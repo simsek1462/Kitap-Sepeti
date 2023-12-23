@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "53279265092",
+    "firebase_url": "https://book-shopping-1de8e-default-rtdb.firebaseio.com",
+    "project_id": "book-shopping-1de8e",
+    "storage_bucket": "book-shopping-1de8e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:53279265092:android:a484194bac9ab50b838711",
+        "android_client_info": {
+          "package_name": "com.example.my_flutter_project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "53279265092-o97vd8iqf46t9ljks5mg0285pnad2clb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.my_flutter_project",
+            "certificate_hash": "20cdda73911253f9566d28b38ac1fbba86960a71"
+          }
+        },
+        {
+          "client_id": "53279265092-mt5udmc9i2p7qvaoedr4md6qfagjrbv0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKa7hLvIvSdr9BqMysSDqDE38loGG5we8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "53279265092-mt5udmc9i2p7qvaoedr4md6qfagjrbv0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "53279265092-d2s4ttc3trdsqs9jm0rbdervl514ochd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.myFlutterProject"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>53279265092-qlqu3ks6iqd8vegvv9vu0gfpohm7ik0r.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.53279265092-qlqu3ks6iqd8vegvv9vu0gfpohm7ik0r</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>53279265092-o97vd8iqf46t9ljks5mg0285pnad2clb.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBch3Z6XlTlijo2czNxaIHKrvERyDDVs2E</string>
+	<key>GCM_SENDER_ID</key>
+	<string>53279265092</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.myFlutterProject.RunnerTests</string>
+	<key>PROJECT_ID</key>
+	<string>book-shopping-1de8e</string>
+	<key>STORAGE_BUCKET</key>
+	<string>book-shopping-1de8e.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:53279265092:ios:72c2cc36520d68da838711</string>
+	<key>DATABASE_URL</key>
+	<string>https://book-shopping-1de8e-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>
