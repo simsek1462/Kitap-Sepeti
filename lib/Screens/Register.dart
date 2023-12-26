@@ -76,24 +76,21 @@ class _RegisterFormState extends State<Register> {
         Fluttertoast.showToast(msg: e.message!);
       }
   }
-
   Future<void> _registerUser(
       String name, String surname, String mail, String password) async {
     await Firebase
         .initializeApp(); // Initialize Firebase app if not already initialized
-
     DatabaseReference _userRef =
         FirebaseDatabase.instance.reference().child('users');
-
     // Push user data to Firebase under a unique ID
     await _userRef.push().set({
       'name': name,
       'surname': surname,
       'mail': mail,
       'password': password,
+      'role':'user',
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
