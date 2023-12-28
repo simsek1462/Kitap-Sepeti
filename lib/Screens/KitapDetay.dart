@@ -74,7 +74,7 @@ class KitapDetay extends StatelessWidget {
                       ),
                       SizedBox(height: 8.0),
                       Text(
-                        'Fiyat: \$${book.price.toString()}', // Fiyat
+                        'Fiyat: ${book.price.toString()} TL', // Fiyat
                         style: TextStyle(fontSize: 18.0),
                       ),
                       SizedBox(height: 16.0),

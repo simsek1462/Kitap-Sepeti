@@ -21,8 +21,9 @@ class MyApp extends StatelessWidget {
 
       debugShowCheckedModeBanner:false ,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
         useMaterial3: true,
+        fontFamily: 'font1'
       ),
       home:   Login(),
     );

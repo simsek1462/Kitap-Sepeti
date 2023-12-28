@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:my_flutter_project/Screens/KitapDetay.dart';
 import 'package:my_flutter_project/Screens/Sepet.dart';
 import 'package:my_flutter_project/Screens/UserDetails.dart';
@@ -15,7 +17,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final databaseReference = FirebaseDatabase.instance.ref("books");
-
+  final id = FirebaseAuth.instance.currentUser?.uid;
   bool aramaYapiliyorMu = false;
 
   String aramaKelimesi = "";
@@ -24,12 +26,12 @@ class _HomeState extends State<Home> {
     return databaseReference.child('books').onValue.map((event) {
       final books = <Book>[];
       final Map<dynamic, dynamic>? data =
-          event.snapshot.value as Map<dynamic, dynamic>?;
+      event.snapshot.value as Map<dynamic, dynamic>?;
 
       if (data != null) {
         data.forEach((key, value) {
           final bookData =
-              value as Map<String, dynamic>; // Her bir kitap verisi
+          value as Map<String, dynamic>; // Her bir kitap verisi
           final book = Book.fromJson(key, bookData);
           books.add(book);
         });
@@ -58,15 +60,22 @@ class _HomeState extends State<Home> {
         Navigator.push(context, MaterialPageRoute(builder: (context) => KitapDetay(book: book,)));
       },
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.5 -
-            10, // Cihaz genişliğinin yarısından biraz az
-        height: MediaQuery.of(context).size.height *
-            0.50, // Cihaz yüksekliğinin 4'te biri
-        margin: EdgeInsets.all(5), // Kenar boşlukları
-        padding: EdgeInsets.all(8), // İçerik boşlukları
+        width: MediaQuery.of(context).size.width * 0.5 - 10,
+        height: MediaQuery.of(context).size.height * 0.50,
+        margin: EdgeInsets.all(5),
+        padding: EdgeInsets.all(8),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey), // Sınır çizgisi
-          borderRadius: BorderRadius.circular(8), // Köşeleri yumuşat
+          color: Colors.white,
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5), // Gölge rengi ve şeffaflığı
+              spreadRadius: 3, // Gölgenin yayılma miktarı
+              blurRadius: 5, // Gölge bulanıklığı
+              offset: Offset(0, 3), // Gölgenin x ve y ekseninde kayması
+            ),
+          ],// Container rengi
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -75,7 +84,7 @@ class _HomeState extends State<Home> {
             Column(
               children: [
                 Image.network(
-                  book.imageUrl ?? '', // Resim URL'si
+                  book.imageUrl ?? '',
                   width: 75,
                   height: 75,
                 ),
@@ -86,29 +95,30 @@ class _HomeState extends State<Home> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  book.title ?? 'No Title', // Kitabın başlığı
+                  book.title ?? 'No Title',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  book.author ?? '', // Kitabın konusu
+                  book.author ?? '',
                 ),
               ],
             ),
-
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Text(
-                  '\$${book.price.toString()}', // Kitabın fiyatı
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  '${book.price.toString()} TL',
+                  style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.black),
                 ),
                 IconButton(
-                  icon: Icon(Icons.shopping_cart), // Sepet ikonu
+                  icon: Icon(Icons.shopping_basket_outlined),
+                  iconSize: 30,
+                  color: Colors.lightBlueAccent,
                   onPressed: () {
-                    // Sepete ekleme işlemi
+                    Fluttertoast.showToast(msg: 'Sepete eklendi',backgroundColor: Colors.green);
                     addToCart(
-                      book.id.toString(), // Kitabın ID'si
-                      'kullanici_idsi', // Kullanıcı ID'si (gerçek kullanıcı ID'si gelecek)
+                      book.id.toString(),
+                      id.toString(),
                     );
                   },
                 ),
@@ -119,75 +129,69 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+
   int _selectedIndex = 0;
   void _onItemTapped(int index) {
-    // setState ile _selectedIndex güncelleniyor
     setState(() {
       _selectedIndex = index;
     });
 
-    // Hangi indekse tıklanıldığını kullanarak sayfaları yönlendirebilirsiniz
-    // Örneğin:
     if (_selectedIndex == 0) {
-      // İlk ikona tıklandıysa, Home sayfasına git
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Home()), // HomeScreen yerine gideceğiniz sayfa olmalı
+        MaterialPageRoute(builder: (context) => Home()),
       );
     } else if (_selectedIndex == 1) {
-      // İkinci ikona tıklandıysa, Business sayfasına git
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Sepet()), // BusinessScreen yerine gideceğiniz sayfa olmalı
+        MaterialPageRoute(builder: (context) => Sepet()),
       );
     } else if (_selectedIndex == 2) {
-      // Üçüncü ikona tıklandıysa, School sayfasına git
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => UserDetails()), // SchoolScreen yerine gideceğiniz sayfa olmalı
+        MaterialPageRoute(builder: (context) => UserDetails()),
       );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {},
-          ),
+          automaticallyImplyLeading: false,
+          centerTitle: true,
+          backgroundColor: Colors.blue,
           title: aramaYapiliyorMu
               ? TextField(
-                  decoration:
-                      InputDecoration(hintText: "Arama için birşey yazın"),
-                  onChanged: (aramaSonucu) {
-                    print("Arama sonucu : $aramaSonucu");
-                    setState(() {
-                      aramaKelimesi = aramaSonucu;
-                    });
-                  },
-                )
-              : Text("Shopping Book"),
+            decoration:
+            InputDecoration(hintText: "Arama için birşey yazın"),
+            onChanged: (aramaSonucu) {
+              setState(() {
+                aramaKelimesi = aramaSonucu;
+              });
+            },
+          )
+              : Text("kitapsepeti",style: TextStyle(color: Colors.white),),
           actions: [
             aramaYapiliyorMu
                 ? IconButton(
-                    icon: Icon(Icons.cancel),
-                    onPressed: () {
-                      setState(() {
-                        aramaYapiliyorMu = false;
-                        aramaKelimesi = "";
-                      });
-                    },
-                  )
+              icon: Icon(Icons.cancel),
+              onPressed: () {
+                setState(() {
+                  aramaYapiliyorMu = false;
+                  aramaKelimesi = "";
+                });
+              },
+            )
                 : IconButton(
-                    icon: Icon(Icons.search),
-                    onPressed: () {
-                      setState(() {
-                        aramaYapiliyorMu = true;
-                      });
-                    },
-                  ),
+              icon: Icon(Icons.search),
+              onPressed: () {
+                setState(() {
+                  aramaYapiliyorMu = true;
+                });
+              },
+            ),
           ],
         ),
         body: SingleChildScrollView(
@@ -203,10 +207,9 @@ class _HomeState extends State<Home> {
                           null) {
                     final myMessages = Map<dynamic, dynamic>.from(
                         (snapshot.data! as DatabaseEvent).snapshot.value
-                            as Map<dynamic, dynamic>); //typecasting
+                        as Map<dynamic, dynamic>);
                     myMessages.forEach((key, value) {
                       final currentMessage = Map<String, dynamic>.from(value);
-                      print(currentMessage);
                       if (aramaYapiliyorMu) {
                         if (currentMessage['title']
                             .toString()
@@ -230,24 +233,23 @@ class _HomeState extends State<Home> {
                           currentMessage['subject'].toString(),
                           currentMessage['imageUrl'].toString(),
                         ));
-                        print(bookList.first.title.toString());
                       }
                     });
                     return SizedBox(
-                        child: GridView.builder(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2, // 2 sütunlu grid
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                          ),
-                          itemCount: bookList.length,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemBuilder: (context, index) {
-                            return buildBookContainer(context, bookList[index]);
-                          },
-                        ));
+                      child: GridView.builder(
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
+                        itemCount: bookList.length,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          return buildBookContainer(context, bookList[index]);
+                        },
+                      ),
+                    );
                   } else {
                     return const Center(
                       child: Text(
@@ -280,12 +282,12 @@ class _HomeState extends State<Home> {
             ),
           ],
           currentIndex: _selectedIndex,
-          selectedItemColor: Colors.blueGrey,
+          selectedItemColor: Colors.black, // Seçili olan öğe rengi
+          unselectedItemColor: Colors.white,
           onTap: _onItemTapped,
-        )));
-
-
-
-
+          backgroundColor: Colors.blue, // Bottom navigation bar rengi
+        ),
+      ),
+    );
   }
 }

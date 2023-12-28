@@ -19,7 +19,7 @@ class Book {
     };
   }
 
-  factory Book.fromJson(String key,Map<String, dynamic> json) {
+  factory Book.fromJson(String key,Map<dynamic, dynamic> json) {
     return Book(
       key,
       json['title'] as String?,

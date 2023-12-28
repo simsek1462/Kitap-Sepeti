@@ -38,7 +38,7 @@ class _KitapEkle extends State<KitapEkle> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Add Book')),
+      appBar: AppBar(title: Text('Kitap Ekle')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
