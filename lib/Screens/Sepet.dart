@@ -44,19 +44,18 @@ class _SepetState extends State<Sepet> {
       );
     }
   }
-
   @override
   Widget build(BuildContext context) {
     List<Book> bookList = [];
     List<Cart> cartList = [];
+    List<int> quantities = [];
+
     String calculateTotalPrice(List<Book> bookList) {
       double totalPrice = 0;
-
       // Tüm kitapların fiyatını topla
       for (var book in bookList) {
         totalPrice += book.price!;
       }
-
       // Toplam fiyatı string olarak döndür
       return totalPrice
           .toStringAsFixed(2); // Virgülden sonra 2 basamak göstermek için
@@ -89,7 +88,6 @@ class _SepetState extends State<Sepet> {
                 (snapshot.data! as DatabaseEvent).snapshot.value
                 as Map<dynamic, dynamic>,
               );
-
               myMessages.forEach((key, value) async {
                 final currentMessage = Map<String, dynamic>.from(value);
                 var bookId = currentMessage['bookId'];
@@ -98,7 +96,6 @@ class _SepetState extends State<Sepet> {
                 DatabaseReference bookRef =
                 FirebaseDatabase.instance.ref("books/$bookId");
                 final bookSnapshot = await bookRef.once();
-
                 if (bookSnapshot.snapshot.value != null) {
                   var gelenDegerler = bookSnapshot.snapshot.value as dynamic;
                   bookList.add(Book(
@@ -110,8 +107,8 @@ class _SepetState extends State<Sepet> {
                     gelenDegerler['imageUrl'].toString(),
                   ));
                 }
+                quantities = List.generate(bookList.length, (index) => 1);
               });
-
               return FutureBuilder(
                 future:
                 databaseReference.orderByChild('userId').equalTo(id).once(),
@@ -132,20 +129,32 @@ class _SepetState extends State<Sepet> {
                             itemBuilder: (context, index) {
                               return Card(
                                 child: ListTile(
-                                  leading:
-                                  Image.network(bookList[index].imageUrl!),
+                                  leading: Image.network(bookList[index].imageUrl!),
                                   title: Text(bookList[index].title!),
-                                  subtitle:
-                                  Text(bookList[index].price.toString()),
-                                  trailing: IconButton(
-                                    icon: Icon(Icons.remove),
-                                    onPressed: () {
-                                      sil(cartList[index].key);
-                                      setState(() {
-                                        bookList.removeAt(index);
-                                      });
-                                      // Burada veritabanından da çıkarabilirsiniz.
-                                    },
+                                  subtitle: Text(bookList[index].price.toString()),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(Icons.remove),
+                                        onPressed: () {
+                                          setState(() {
+                                            if (quantities[index] > 1) {
+                                              quantities[index]--; // Azaltma işlemi
+                                            }
+                                          });
+                                        },
+                                      ),
+                                      Text(quantities[index].toString()), // Adet sayısını göstermek için metin
+                                      IconButton(
+                                        icon: Icon(Icons.add),
+                                        onPressed: () {
+                                          setState(() {
+                                            quantities[index]++; // Arttırma işlemi
+                                          });
+                                        },
+                                      ),
+                                    ],
                                   ),
                                 ),
                               );
@@ -204,7 +213,7 @@ class _SepetState extends State<Sepet> {
             ),
           ],
           currentIndex: _selectedIndex,
-          selectedItemColor: Colors.black,
+          selectedItemColor: Colors.greenAccent,
           unselectedItemColor: Colors.white,
           onTap: _onItemTapped,
         ),

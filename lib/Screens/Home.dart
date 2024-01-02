@@ -282,7 +282,7 @@ class _HomeState extends State<Home> {
             ),
           ],
           currentIndex: _selectedIndex,
-          selectedItemColor: Colors.black, // Seçili olan öğe rengi
+          selectedItemColor: Colors.greenAccent, // Seçili olan öğe rengi
           unselectedItemColor: Colors.white,
           onTap: _onItemTapped,
           backgroundColor: Colors.blue, // Bottom navigation bar rengi

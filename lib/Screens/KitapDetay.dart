@@ -21,6 +21,7 @@ class KitapDetay extends StatelessWidget {
       await newCartRef.set({
         'bookId': bookId,
         'userId': userId,
+        'adet':1,
         // Ekstra bilgiler veya gereksinimlere göre diğer alanlar eklenebilir
       });
       Fluttertoast.showToast(msg: 'Başarıyla Eklendi',textColor: Colors.white,backgroundColor: Colors.green);

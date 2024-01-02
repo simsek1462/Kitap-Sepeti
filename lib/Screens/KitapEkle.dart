@@ -38,14 +38,19 @@ class _KitapEkle extends State<KitapEkle> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Kitap Ekle')),
+      appBar: AppBar(
+        title: Text(
+          'Kitap Ekle',
+          style: TextStyle(fontSize: 25),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextFormField(
                   controller: _titleController,
@@ -107,7 +112,7 @@ class _KitapEkle extends State<KitapEkle> {
                       _saveBook();
                     }
                   },
-                  child: Text('Save'),
+                  child: Text('Kaydet'),
                 ),
               ],
             ),
@@ -133,7 +138,8 @@ class _KitapEkle extends State<KitapEkle> {
       imageUrl,
     );
 
-    DatabaseReference booksRef = FirebaseDatabase.instance.reference().child('books');
+    DatabaseReference booksRef =
+        FirebaseDatabase.instance.reference().child('books');
     booksRef.push().set(newBook.toJson());
 
     // Kayıt yapıldıktan sonra formu temizle

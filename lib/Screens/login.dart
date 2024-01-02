@@ -114,7 +114,7 @@ class _LoginState extends State<Login> {
               TextFormField(
                 controller: _mailController,
                 decoration: InputDecoration(
-                  labelText: 'Username',
+                  labelText: 'E-posta',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                   ),
@@ -131,7 +131,7 @@ class _LoginState extends State<Login> {
                 controller: _passwordController,
                 obscureText: _isObscure,
                 decoration: InputDecoration(
-                  labelText: 'Password',
+                  labelText: 'Şifre',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                   ),
@@ -171,7 +171,7 @@ class _LoginState extends State<Login> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), // Köşe yuvarlatma
                     ),
                     child: Text(
-                      'Sign In',
+                      'Giriş Yap',
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
