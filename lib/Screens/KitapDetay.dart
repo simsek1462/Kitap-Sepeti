@@ -10,6 +10,7 @@ class KitapDetay extends StatelessWidget {
   final Book book;
 
   KitapDetay({required this.book});
+
   Future<void> addToCart(String bookId, String userId) async {
     DatabaseReference cartReference = FirebaseDatabase.instance.ref("cart");
 
@@ -17,19 +18,42 @@ class KitapDetay extends StatelessWidget {
     DatabaseReference newCartRef = cartReference.push();
 
     // Yeni bir 'cart item' oluştur
-    try{
+    try {
       await newCartRef.set({
         'bookId': bookId,
         'userId': userId,
-        'adet':1,
+        'adet': 1,
         // Ekstra bilgiler veya gereksinimlere göre diğer alanlar eklenebilir
       });
-      Fluttertoast.showToast(msg: 'Başarıyla Eklendi',textColor: Colors.white,backgroundColor: Colors.green);
-    }on FirebaseException catch(e){
+      Fluttertoast.showToast(
+          msg: 'Başarıyla Eklendi',
+          textColor: Colors.white,
+          backgroundColor: Colors.green);
+    } on FirebaseException catch (e) {
       Fluttertoast.showToast(msg: e.message!);
     }
-
   }
+
+  Future<void> addToFavorites(String bookId, String userId) async {
+    DatabaseReference favoritesReference =
+    FirebaseDatabase.instance.ref("favorites");
+
+    DatabaseReference newFavoriteRef = favoritesReference.push();
+
+    try {
+      await newFavoriteRef.set({
+        'bookId': bookId,
+        'userId': userId,
+      });
+      Fluttertoast.showToast(
+          msg: 'Favorilere Eklendi',
+          textColor: Colors.white,
+          backgroundColor: Colors.blue);
+    } on FirebaseException catch (e) {
+      Fluttertoast.showToast(msg: e.message!);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,10 +107,21 @@ class KitapDetay extends StatelessWidget {
                         onPressed: () {
                           User? user = FirebaseAuth.instance.currentUser;
                           addToCart(book.id.toString(), user!.uid);
-                          // Sepete ekleme işlemi
-                          // addToCart(book.id.toString(), 'kullanici_idsi');
                         },
                         child: Text('Sepete Ekle'), // Sepete ekle butonu
+                      ),
+                      SizedBox(height: 16.0),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: IconButton(
+                          onPressed: () {
+                            User? user = FirebaseAuth.instance.currentUser;
+                            addToFavorites(book.id.toString(), user!.uid);
+                          },
+                          icon: Icon(Icons.favorite_border), // Favori ekleme ikonu
+                          color: Colors.red, // Favori ikon rengi
+                          iconSize: 30.0,
+                        ),
                       ),
                     ],
                   ),

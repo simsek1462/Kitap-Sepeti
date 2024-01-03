@@ -7,6 +7,7 @@ import 'package:my_flutter_project/Screens/Sepet.dart';
 import 'package:my_flutter_project/Screens/UserDetails.dart';
 
 import '../Models/Book.dart';
+import 'Favori.dart';
 
 class Home extends StatefulWidget {
   Home({super.key});
@@ -26,12 +27,12 @@ class _HomeState extends State<Home> {
     return databaseReference.child('books').onValue.map((event) {
       final books = <Book>[];
       final Map<dynamic, dynamic>? data =
-      event.snapshot.value as Map<dynamic, dynamic>?;
+          event.snapshot.value as Map<dynamic, dynamic>?;
 
       if (data != null) {
         data.forEach((key, value) {
           final bookData =
-          value as Map<String, dynamic>; // Her bir kitap verisi
+              value as Map<String, dynamic>; // Her bir kitap verisi
           final book = Book.fromJson(key, bookData);
           books.add(book);
         });
@@ -54,14 +55,31 @@ class _HomeState extends State<Home> {
     });
   }
 
+  Future<void> addToFavorites(String bookId, String userId) async {
+    DatabaseReference favoritesReference = FirebaseDatabase.instance.ref("fav");
+
+    // Favorilere ekleme işlemi için yeni bir key oluştur
+    DatabaseReference newFavoriteRef = favoritesReference.push();
+
+    // Yeni bir 'favorite item' oluştur
+    await newFavoriteRef.set({
+      'bookId': bookId,
+      'userId': userId,
+      // Ekstra bilgiler veya gereksinimlere göre diğer alanlar eklenebilir
+    });
+  }
+
   Widget buildBookContainer(BuildContext context, Book book) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => KitapDetay(book: book,)));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => KitapDetay(book: book)),
+        );
       },
       child: Container(
         width: MediaQuery.of(context).size.width * 0.5 - 10,
-        height: MediaQuery.of(context).size.height * 0.50,
+        height: MediaQuery.of(context).size.height * 0.70,
         margin: EdgeInsets.all(5),
         padding: EdgeInsets.all(8),
         decoration: BoxDecoration(
@@ -70,23 +88,35 @@ class _HomeState extends State<Home> {
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.5), // Gölge rengi ve şeffaflığı
-              spreadRadius: 3, // Gölgenin yayılma miktarı
-              blurRadius: 5, // Gölge bulanıklığı
-              offset: Offset(0, 3), // Gölgenin x ve y ekseninde kayması
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 3,
+              blurRadius: 5,
+              offset: Offset(0, 3),
             ),
-          ],// Container rengi
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            GestureDetector(
+              onTap: () {
+                addToFavorites(book.id.toString(), id.toString());
+              },
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: Icon(
+                  Icons.favorite_border,
+                  color: Colors.redAccent,
+                ),
+              ),
+            ),
             Column(
               children: [
                 Image.network(
                   book.imageUrl ?? '',
-                  width: 75,
-                  height: 75,
+                  width: 60,
+                  height: 60,
                 ),
               ],
             ),
@@ -108,14 +138,21 @@ class _HomeState extends State<Home> {
               children: [
                 Text(
                   '${book.price.toString()} TL',
-                  style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.black),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: Colors.black,
+                  ),
                 ),
                 IconButton(
                   icon: Icon(Icons.shopping_basket_outlined),
                   iconSize: 30,
                   color: Colors.lightBlueAccent,
                   onPressed: () {
-                    Fluttertoast.showToast(msg: 'Sepete eklendi',backgroundColor: Colors.green);
+                    Fluttertoast.showToast(
+                      msg: 'Sepete eklendi',
+                      backgroundColor: Colors.green,
+                    );
                     addToCart(
                       book.id.toString(),
                       id.toString(),
@@ -149,6 +186,11 @@ class _HomeState extends State<Home> {
     } else if (_selectedIndex == 2) {
       Navigator.pushReplacement(
         context,
+        MaterialPageRoute(builder: (context) => Favori()),
+      );
+    } else if (_selectedIndex == 3) {
+      Navigator.pushReplacement(
+        context,
         MaterialPageRoute(builder: (context) => UserDetails()),
       );
     }
@@ -158,40 +200,44 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           automaticallyImplyLeading: false,
           centerTitle: true,
           backgroundColor: Colors.blue,
           title: aramaYapiliyorMu
               ? TextField(
-            decoration:
-            InputDecoration(hintText: "Arama için birşey yazın"),
-            onChanged: (aramaSonucu) {
-              setState(() {
-                aramaKelimesi = aramaSonucu;
-              });
-            },
-          )
-              : Text("kitapsepeti",style: TextStyle(color: Colors.white),),
+                  decoration:
+                      InputDecoration(hintText: "Arama için birşey yazın"),
+                  onChanged: (aramaSonucu) {
+                    setState(() {
+                      aramaKelimesi = aramaSonucu;
+                    });
+                  },
+                )
+              : Text(
+                  "kitapsepeti",
+                  style: TextStyle(color: Colors.white),
+                ),
           actions: [
             aramaYapiliyorMu
                 ? IconButton(
-              icon: Icon(Icons.cancel),
-              onPressed: () {
-                setState(() {
-                  aramaYapiliyorMu = false;
-                  aramaKelimesi = "";
-                });
-              },
-            )
+                    icon: Icon(Icons.cancel),
+                    onPressed: () {
+                      setState(() {
+                        aramaYapiliyorMu = false;
+                        aramaKelimesi = "";
+                      });
+                    },
+                  )
                 : IconButton(
-              icon: Icon(Icons.search),
-              onPressed: () {
-                setState(() {
-                  aramaYapiliyorMu = true;
-                });
-              },
-            ),
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      setState(() {
+                        aramaYapiliyorMu = true;
+                      });
+                    },
+                  ),
           ],
         ),
         body: SingleChildScrollView(
@@ -207,7 +253,7 @@ class _HomeState extends State<Home> {
                           null) {
                     final myMessages = Map<dynamic, dynamic>.from(
                         (snapshot.data! as DatabaseEvent).snapshot.value
-                        as Map<dynamic, dynamic>);
+                            as Map<dynamic, dynamic>);
                     myMessages.forEach((key, value) {
                       final currentMessage = Map<String, dynamic>.from(value);
                       if (aramaYapiliyorMu) {
@@ -237,7 +283,8 @@ class _HomeState extends State<Home> {
                     });
                     return SizedBox(
                       child: GridView.builder(
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
@@ -267,6 +314,13 @@ class _HomeState extends State<Home> {
           ),
         ),
         bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed, // Eğer fazla öğe varsa bu kullanılabilir
+          backgroundColor: Colors.blue,
+          selectedItemColor: Colors.greenAccent,
+          unselectedItemColor: Colors.white,
+          showUnselectedLabels: true,
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
@@ -277,16 +331,16 @@ class _HomeState extends State<Home> {
               label: 'Sepet',
             ),
             BottomNavigationBarItem(
+              icon: Icon(Icons.favorite),
+              label: 'Favori',
+            ),
+            BottomNavigationBarItem(
               icon: Icon(Icons.person),
               label: 'Kullanıcı',
             ),
           ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.greenAccent, // Seçili olan öğe rengi
-          unselectedItemColor: Colors.white,
-          onTap: _onItemTapped,
-          backgroundColor: Colors.blue, // Bottom navigation bar rengi
         ),
+
       ),
     );
   }

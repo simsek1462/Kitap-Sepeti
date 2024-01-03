@@ -6,6 +6,7 @@ import '../Models/Book.dart';
 import '../Models/Cart.dart';
 import 'Home.dart';
 import 'UserDetails.dart';
+import 'Favori.dart'; // Favori ekranı import edilmeli
 
 class Sepet extends StatefulWidget {
   Sepet({Key? key});
@@ -35,15 +36,19 @@ class _SepetState extends State<Sepet> {
         context,
         MaterialPageRoute(builder: (context) => Home()),
       );
-    } else if (_selectedIndex == 1) {
-      // Sepet sayfası zaten gösteriliyor, dolayısıyla başka bir şey yapmanıza gerek yok
     } else if (_selectedIndex == 2) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => UserDetails()),
       );
+    } else if (_selectedIndex == 3) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Favori()), // Favori ekranına yönlendirme
+      );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     List<Book> bookList = [];
@@ -63,6 +68,7 @@ class _SepetState extends State<Sepet> {
 
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Colors.blue,
         appBar: AppBar(
           title: Text("Sepet"),
           backgroundColor: Colors.blue, // App bar'ın rengi mavi
@@ -72,8 +78,7 @@ class _SepetState extends State<Sepet> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                    builder: (context) =>
-                        Home()), // HomeScreen yerine gideceğiniz sayfa olmalı
+                    builder: (context) => Home()), // HomeScreen yerine gideceğiniz sayfa olmalı
               );
             },
           ),
@@ -120,71 +125,77 @@ class _SepetState extends State<Sepet> {
                   } else if (!snapshot.hasData || snapshot == null) {
                     return Center(child: Text('Sepetiniz boş.'));
                   } else {
-                    return Column(
-                      children: [
-                        Expanded(
-                          child: ListView.builder(
-                            reverse: false,
-                            itemCount: bookList.length,
-                            itemBuilder: (context, index) {
-                              return Card(
-                                child: ListTile(
-                                  leading: Image.network(bookList[index].imageUrl!),
-                                  title: Text(bookList[index].title!),
-                                  subtitle: Text(bookList[index].price.toString()),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        icon: Icon(Icons.remove),
-                                        onPressed: () {
-                                          setState(() {
-                                            if (quantities[index] > 1) {
-                                              quantities[index]--; // Azaltma işlemi
-                                            }
-                                          });
-                                        },
-                                      ),
-                                      Text(quantities[index].toString()), // Adet sayısını göstermek için metin
-                                      IconButton(
-                                        icon: Icon(Icons.add),
-                                        onPressed: () {
-                                          setState(() {
-                                            quantities[index]++; // Arttırma işlemi
-                                          });
-                                        },
-                                      ),
-                                    ],
+                    return Container(
+                      color: Colors.white,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: ListView.builder(
+                              reverse: false,
+                              itemCount: bookList.length,
+                              itemBuilder: (context, index) {
+                                return Card(
+                                  child: ListTile(
+                                    leading:
+                                    Image.network(bookList[index].imageUrl!),
+                                    title: Text(bookList[index].title!),
+                                    subtitle: Text(
+                                        bookList[index].price.toString()),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          icon: Icon(Icons.remove),
+                                          onPressed: () {
+                                            setState(() {
+                                              if (quantities[index] > 1) {
+                                                quantities[index]--; // Azaltma işlemi
+                                              }
+                                            });
+                                          },
+                                        ),
+                                        Text(quantities[index]
+                                            .toString()), // Adet sayısını göstermek için metin
+                                        IconButton(
+                                          icon: Icon(Icons.add),
+                                          onPressed: () {
+                                            setState(() {
+                                              quantities[index]++; // Arttırma işlemi
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  'Toplam: ${calculateTotalPrice(bookList)}',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              );
-                            },
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(
-                                'Toplam: ${calculateTotalPrice(bookList)}',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                                SizedBox(height: 16),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    // Ödeme işlemi
+                                    // Burada ödeme işlemleri veya yönlendirme yapılabilir
+                                  },
+                                  child: Text('Ödemeyi Tamamla'),
                                 ),
-                              ),
-                              SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () {
-                                  // Ödeme işlemi
-                                  // Burada ödeme işlemleri veya yönlendirme yapılabilir
-                                },
-                                child: Text('Ödemeyi Tamamla'),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     );
                   }
                 },
@@ -197,7 +208,13 @@ class _SepetState extends State<Sepet> {
           },
         ),
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.blue, // Bottom navigation bar'ın rengi mavi
+          type: BottomNavigationBarType.fixed, // Eğer fazla öğe varsa bu kullanılabilir
+          backgroundColor: Colors.blue,
+          selectedItemColor: Colors.greenAccent,
+          unselectedItemColor: Colors.white,
+          showUnselectedLabels: true,
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
@@ -208,14 +225,14 @@ class _SepetState extends State<Sepet> {
               label: 'Sepet',
             ),
             BottomNavigationBarItem(
+              icon: Icon(Icons.favorite),
+              label: 'Favori',
+            ),
+            BottomNavigationBarItem(
               icon: Icon(Icons.person),
               label: 'Kullanıcı',
             ),
           ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.greenAccent,
-          unselectedItemColor: Colors.white,
-          onTap: _onItemTapped,
         ),
       ),
     );
