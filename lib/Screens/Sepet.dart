@@ -20,7 +20,7 @@ class _SepetState extends State<Sepet> {
   var refCarts = FirebaseDatabase.instance.ref().child("cart");
   DatabaseReference databaseReference = FirebaseDatabase.instance.ref("cart");
   Future<void> sil(String key) async {
-    refCarts.child(key).remove();
+    await databaseReference.child(key).remove();
   }
 
   int _selectedIndex =
@@ -39,12 +39,12 @@ class _SepetState extends State<Sepet> {
     } else if (_selectedIndex == 2) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => UserDetails()),
+        MaterialPageRoute(builder: (context) => Favori()),
       );
     } else if (_selectedIndex == 3) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Favori()), // Favori ekranına yönlendirme
+        MaterialPageRoute(builder: (context) => UserDetails()), // Favori ekranına yönlendirme
       );
     }
   }
@@ -148,9 +148,8 @@ class _SepetState extends State<Sepet> {
                                           icon: Icon(Icons.remove),
                                           onPressed: () {
                                             setState(() {
-                                              if (quantities[index] > 1) {
-                                                quantities[index]--; // Azaltma işlemi
-                                              }
+                                             sil(cartList[index].key);
+                                             bookList.removeAt(index);
                                             });
                                           },
                                         ),

@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -56,7 +58,7 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> addToFavorites(String bookId, String userId) async {
-    DatabaseReference favoritesReference = FirebaseDatabase.instance.ref("fav");
+    DatabaseReference favoritesReference = FirebaseDatabase.instance.ref("favorites");
 
     // Favorilere ekleme işlemi için yeni bir key oluştur
     DatabaseReference newFavoriteRef = favoritesReference.push();
@@ -70,6 +72,7 @@ class _HomeState extends State<Home> {
   }
 
   Widget buildBookContainer(BuildContext context, Book book) {
+    bool isFavorite = false;
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -101,12 +104,14 @@ class _HomeState extends State<Home> {
           children: [
             GestureDetector(
               onTap: () {
-                addToFavorites(book.id.toString(), id.toString());
+                setState(() {
+                  isFavorite = !isFavorite; // Favori durumunu değiştir
+                });
               },
               child: Container(
                 alignment: Alignment.topLeft,
                 child: Icon(
-                  Icons.favorite_border,
+                  isFavorite ? Icons.favorite : Icons.favorite_border, // İkon durumuna göre değişecek
                   color: Colors.redAccent,
                 ),
               ),
