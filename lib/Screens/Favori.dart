@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:my_flutter_project/Models/Favorite.dart';
 import 'package:my_flutter_project/Screens/Sepet.dart';
 
 import '../Models/Book.dart';
 import '../Models/Cart.dart';
 import 'Home.dart';
+import 'KitapDetay.dart';
 import 'UserDetails.dart';
 import 'Favori.dart'; // Favori ekranı import edilmeli
 
@@ -54,7 +56,19 @@ class _FavoriState extends State<Favori> {
       );
     }
   }
+  Future<void> addToCart(String bookId, String userId) async {
+    DatabaseReference cartReference = FirebaseDatabase.instance.ref("cart");
 
+    // Sepete ekleme işlemi için yeni bir key oluştur
+    DatabaseReference newCartRef = cartReference.push();
+
+    // Yeni bir 'cart item' oluştur
+    await newCartRef.set({
+      'bookId': bookId,
+      'userId': userId,
+      // Ekstra bilgiler veya gereksinimlere göre diğer alanlar eklenebilir
+    });
+  }
   @override
   Widget build(BuildContext context) {
     List<Book> bookList = [];
@@ -126,26 +140,50 @@ class _FavoriState extends State<Favori> {
                               reverse: false,
                               itemCount: bookList.length,
                               itemBuilder: (context, index) {
-                                return Card(
-                                  child: ListTile(
-                                    leading:
-                                    Image.network(bookList[index].imageUrl!),
-                                    title: Text(bookList[index].title!),
-                                    subtitle: Text(
-                                        bookList[index].price.toString()),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: Icon(Icons.remove),
-                                          onPressed: () {
-                                            sil(favorites[index].key);
-                                            setState(() {
-                                              bookList.removeAt(index);
-                                            });
-                                          },
-                                        ),
-                                      ],
+                                return GestureDetector(
+                                  onTap: (){
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => KitapDetay(book: bookList[index])),
+                                    );
+                                  },
+                                  child: Card(
+                                    child: ListTile(
+                                      leading:
+                                      Image.network(bookList[index].imageUrl!),
+                                      title: Text(bookList[index].title!,style: TextStyle(fontSize: 16,fontWeight:FontWeight.bold),),
+                                      subtitle: Text(
+                                          '${bookList[index].price.toString()} TL',style: TextStyle(fontSize: 16),),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.remove),
+                                            color: Colors.red,
+                                            onPressed: () {
+                                              sil(favorites[index].key);
+                                              setState(() {
+                                                bookList.removeAt(index);
+                                              });
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.shopping_basket_outlined),
+                                            iconSize: 30,
+                                            color: Colors.lightBlueAccent,
+                                            onPressed: () {
+                                              Fluttertoast.showToast(
+                                                msg: 'Sepete eklendi',
+                                                backgroundColor: Colors.green,
+                                              );
+                                              addToCart(
+                                                bookList[index].id.toString(),
+                                                id.toString(),
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 );

@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import '../Models/Book.dart';
 import '../Models/Cart.dart';
 import 'Home.dart';
+import 'KitapDetay.dart';
 import 'UserDetails.dart';
 import 'Favori.dart'; // Favori ekranı import edilmeli
 
@@ -24,7 +25,7 @@ class _SepetState extends State<Sepet> {
   }
 
   int _selectedIndex =
-  1; // Sepet ekranı, bottom navigation bar'da ikinci sırada olacak
+      1; // Sepet ekranı, bottom navigation bar'da ikinci sırada olacak
 
   void _onItemTapped(int index) {
     setState(() {
@@ -44,7 +45,8 @@ class _SepetState extends State<Sepet> {
     } else if (_selectedIndex == 3) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => UserDetails()), // Favori ekranına yönlendirme
+        MaterialPageRoute(
+            builder: (context) => UserDetails()), // Favori ekranına yönlendirme
       );
     }
   }
@@ -78,7 +80,8 @@ class _SepetState extends State<Sepet> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => Home()), // HomeScreen yerine gideceğiniz sayfa olmalı
+                    builder: (context) =>
+                        Home()), // HomeScreen yerine gideceğiniz sayfa olmalı
               );
             },
           ),
@@ -91,7 +94,7 @@ class _SepetState extends State<Sepet> {
                 (snapshot.data! as DatabaseEvent).snapshot.value != null) {
               final myMessages = Map<dynamic, dynamic>.from(
                 (snapshot.data! as DatabaseEvent).snapshot.value
-                as Map<dynamic, dynamic>,
+                    as Map<dynamic, dynamic>,
               );
               myMessages.forEach((key, value) async {
                 final currentMessage = Map<String, dynamic>.from(value);
@@ -99,7 +102,7 @@ class _SepetState extends State<Sepet> {
                 cartList.add(
                     Cart(key, currentMessage['userId'].toString(), bookId));
                 DatabaseReference bookRef =
-                FirebaseDatabase.instance.ref("books/$bookId");
+                    FirebaseDatabase.instance.ref("books/$bookId");
                 final bookSnapshot = await bookRef.once();
                 if (bookSnapshot.snapshot.value != null) {
                   var gelenDegerler = bookSnapshot.snapshot.value as dynamic;
@@ -116,7 +119,7 @@ class _SepetState extends State<Sepet> {
               });
               return FutureBuilder(
                 future:
-                databaseReference.orderByChild('userId').equalTo(id).once(),
+                    databaseReference.orderByChild('userId').equalTo(id).once(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
@@ -134,36 +137,47 @@ class _SepetState extends State<Sepet> {
                               reverse: false,
                               itemCount: bookList.length,
                               itemBuilder: (context, index) {
-                                return Card(
-                                  child: ListTile(
-                                    leading:
-                                    Image.network(bookList[index].imageUrl!),
-                                    title: Text(bookList[index].title!),
-                                    subtitle: Text(
-                                        bookList[index].price.toString()),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: Icon(Icons.remove),
-                                          onPressed: () {
-                                            setState(() {
-                                             sil(cartList[index].key);
-                                             bookList.removeAt(index);
-                                            });
-                                          },
-                                        ),
-                                        Text(quantities[index]
-                                            .toString()), // Adet sayısını göstermek için metin
-                                        IconButton(
-                                          icon: Icon(Icons.add),
-                                          onPressed: () {
-                                            setState(() {
-                                              quantities[index]++; // Arttırma işlemi
-                                            });
-                                          },
-                                        ),
-                                      ],
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => KitapDetay(
+                                              book: bookList[index])),
+                                    );
+                                  },
+                                  child: Card(
+                                    child: ListTile(
+                                      leading: Image.network(
+                                          bookList[index].imageUrl!),
+                                      title: Text(bookList[index].title!),
+                                      subtitle: Text(
+                                          bookList[index].price.toString()),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.remove),
+                                            onPressed: () {
+                                              setState(() {
+                                                sil(cartList[index].key);
+                                                bookList.removeAt(index);
+                                              });
+                                            },
+                                          ),
+                                          Text(quantities[index]
+                                              .toString()), // Adet sayısını göstermek için metin
+                                          IconButton(
+                                            icon: Icon(Icons.add),
+                                            onPressed: () {
+                                              setState(() {
+                                                quantities[
+                                                    index]++; // Arttırma işlemi
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 );
@@ -207,7 +221,8 @@ class _SepetState extends State<Sepet> {
           },
         ),
         bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed, // Eğer fazla öğe varsa bu kullanılabilir
+          type: BottomNavigationBarType
+              .fixed, // Eğer fazla öğe varsa bu kullanılabilir
           backgroundColor: Colors.blue,
           selectedItemColor: Colors.greenAccent,
           unselectedItemColor: Colors.white,
