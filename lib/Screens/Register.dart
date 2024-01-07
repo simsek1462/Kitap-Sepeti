@@ -63,14 +63,9 @@ class _RegisterFormState extends State<Register> {
         final UserCredential userCredential = await firebaseAuth
             .createUserWithEmailAndPassword(email: mail, password: password);
         if (userCredential.user != null) {
+            _registerUser(name, surname, mail, password);
             await userCredential.user?.sendEmailVerification();
             Navigator.of(context).push(MaterialPageRoute(builder: (context)=> Verify()));
-          if(userCredential.user!.emailVerified)
-            {
-              _registerUser(name, surname, mail, password);
-              Navigator.of(context).push(MaterialPageRoute(builder: (context)=> Home()));
-
-            }
           }
     }on FirebaseAuthException catch(e){
         Fluttertoast.showToast(msg: e.message!);

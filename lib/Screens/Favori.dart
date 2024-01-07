@@ -22,7 +22,7 @@ class Favori extends StatefulWidget {
 class _FavoriState extends State<Favori> {
   final id = FirebaseAuth.instance.currentUser?.uid;
   var refCarts = FirebaseDatabase.instance.ref().child("favorites");
-  DatabaseReference databaseReference = FirebaseDatabase.instance.ref("favorites");
+  final databaseReference = FirebaseDatabase.instance.ref("favorites");
   Future<void> sil(String key) async {
     try {
       await refCarts.child(key).remove();
@@ -32,7 +32,7 @@ class _FavoriState extends State<Favori> {
     }
   }
 
-  int _selectedIndex = 2; // Sepet ekranı, bottom navigation bar'da ikinci sırada olacak
+  int _selectedIndex = 2;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -52,159 +52,164 @@ class _FavoriState extends State<Favori> {
     } else if (_selectedIndex == 3) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => UserDetails()), // Favori ekranına yönlendirme
+        MaterialPageRoute(builder: (context) => UserDetails()),
       );
     }
   }
-  Future<void> addToCart(String bookId, String userId) async {
+
+  Future<void> addToCart(Book book, String userId) async {
     DatabaseReference cartReference = FirebaseDatabase.instance.ref("cart");
 
-    // Sepete ekleme işlemi için yeni bir key oluştur
     DatabaseReference newCartRef = cartReference.push();
 
-    // Yeni bir 'cart item' oluştur
     await newCartRef.set({
-      'bookId': bookId,
+      'bookId': book.id,
       'userId': userId,
-      // Ekstra bilgiler veya gereksinimlere göre diğer alanlar eklenebilir
+      'title': book.title,
+      'author': book.author,
+      'url': book.imageUrl,
+      'price': book.price,
+      'content': book.subject,
     });
   }
+
   @override
   Widget build(BuildContext context) {
     List<Book> bookList = [];
-    List<Favorite> favorites = [];
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.blue,
         appBar: AppBar(
+          backgroundColor:Colors.blue,
           title: Text("Favoriler"),
-          backgroundColor: Colors.blue, // App bar'ın rengi mavi
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => Home()), // HomeScreen yerine gideceğiniz sayfa olmalı
+                MaterialPageRoute(builder: (context) => Home()),
               );
             },
           ),
         ),
-        body: StreamBuilder(
-          stream: databaseReference.orderByChild('userId').equalTo(id).onValue,
-          builder: (context, snapshot) {
-            if (snapshot.hasData &&
-                snapshot.data != null &&
-                (snapshot.data! as DatabaseEvent).snapshot.value != null) {
-              final myMessages = Map<dynamic, dynamic>.from(
-                (snapshot.data! as DatabaseEvent).snapshot.value
-                as Map<dynamic, dynamic>,
-              );
-              myMessages.forEach((key, value) async {
-                final currentMessage = Map<String, dynamic>.from(value);
-                var bookId = currentMessage['bookId'];
-                favorites.add(
-                    Favorite(key, currentMessage['userId'].toString(), bookId));
-                DatabaseReference bookRef =
-                FirebaseDatabase.instance.ref("books/$bookId");
-                final bookSnapshot = await bookRef.once();
-                if (bookSnapshot.snapshot.value != null) {
-                  var gelenDegerler = bookSnapshot.snapshot.value as dynamic;
-                  bookList.add(Book(
-                    bookSnapshot.snapshot.key,
-                    gelenDegerler['title'].toString(),
-                    gelenDegerler['author'].toString(),
-                    double.parse(gelenDegerler['price'].toString()),
-                    gelenDegerler['subject'].toString(),
-                    gelenDegerler['imageUrl'].toString(),
-                  ));
-                }
-              });
-              return FutureBuilder(
-                future:
-                databaseReference.orderByChild('userId').equalTo(id).once(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (!snapshot.hasData || snapshot == null) {
-                    return Center(child: Text('Favori kitabınız yok.'));
-                  } else {
-                    return Container(
-                      color: Colors.white,
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: ListView.builder(
-                              reverse: false,
-                              itemCount: bookList.length,
-                              itemBuilder: (context, index) {
-                                return GestureDetector(
-                                  onTap: (){
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => KitapDetay(book: bookList[index])),
-                                    );
-                                  },
-                                  child: Card(
-                                    child: ListTile(
-                                      leading:
-                                      Image.network(bookList[index].imageUrl!),
-                                      title: Text(bookList[index].title!,style: TextStyle(fontSize: 16,fontWeight:FontWeight.bold),),
-                                      subtitle: Text(
-                                          '${bookList[index].price.toString()} TL',style: TextStyle(fontSize: 16),),
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(Icons.remove),
-                                            color: Colors.red,
-                                            onPressed: () {
-                                              sil(favorites[index].key);
-                                              setState(() {
-                                                bookList.removeAt(index);
-                                              });
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: Icon(Icons.shopping_basket_outlined),
-                                            iconSize: 30,
-                                            color: Colors.lightBlueAccent,
-                                            onPressed: () {
-                                              Fluttertoast.showToast(
-                                                msg: 'Sepete eklendi',
-                                                backgroundColor: Colors.green,
-                                              );
-                                              addToCart(
-                                                bookList[index].id.toString(),
-                                                id.toString(),
-                                              );
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+        body: Container(
+          color: Colors.blue,
+          child: StreamBuilder(
+            stream: databaseReference.orderByChild('userId').equalTo(id).onValue,
+            builder: (context, snapshot) {
+              List<Favorite> favorites = [];
+              if (snapshot.hasData &&
+                  snapshot.data != null &&
+                  (snapshot.data! as DatabaseEvent).snapshot.value != null) {
+                final myMessages = Map<dynamic, dynamic>.from(
+                  (snapshot.data! as DatabaseEvent).snapshot.value
+                      as Map<dynamic, dynamic>,
+                );
+                myMessages.forEach((key, value) async {
+                  final currentMessage = Map<String, dynamic>.from(value);
+                  var bookId = currentMessage['bookId'];
+                  favorites.add(Favorite(
+                      key.toString(),
+                      currentMessage['userId'].toString(),
+                      bookId,
+                      currentMessage['title'].toString(),
+                      currentMessage['author'].toString(),
+                      currentMessage['url'].toString(),
+                      currentMessage['price'].toString(),
+                      currentMessage['content'].toString()));
+                });
+                return Container(
+                  color: Colors.white,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: ListView.builder(
+                          reverse: false,
+                          itemCount: favorites.length,
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () {
+                                Book book = Book(
+                                    favorites[index].bookId,
+                                    favorites[index].title,
+                                    favorites[index].author,
+                                    double.parse(favorites[index].price),
+                                    favorites[index].content,
+                                    favorites[index].url);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          KitapDetay(book: book)),
                                 );
                               },
-                            ),
-                          ),
-                        ],
+                              child: Card(
+                                child: ListTile(
+                                  leading: Image.network(favorites[index].url!),
+                                  title: Text(
+                                    favorites[index].title!,
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(
+                                    '${favorites[index].price.toString()} TL',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(Icons.remove),
+                                        color: Colors.red,
+                                        onPressed: () {
+                                          sil(favorites[index].key);
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon:
+                                            Icon(Icons.shopping_basket_outlined),
+                                        iconSize: 30,
+                                        color: Colors.lightBlueAccent,
+                                        onPressed: () {
+                                          Book book = Book(
+                                              favorites[index].bookId,
+                                              favorites[index].title,
+                                              favorites[index].author,
+                                              double.parse(favorites[index].price),
+                                              favorites[index].content,
+                                              favorites[index].url);
+                                          addToCart(
+                                            book,
+                                            id.toString(),
+                                          );
+                                          Fluttertoast.showToast(
+                                            msg: 'Sepete eklendi',
+                                            backgroundColor: Colors.green,
+                                          );
+
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    );
-                  }
-                },
-              );
-            } else {
-              return Center(
-                child: Text("Sepetiniz boş."),
-              );
-            }
-          },
+                    ],
+                  ),
+                );
+              } else {
+                return Center(
+                  child: Text("Favori ürün yok"),
+                );
+              }
+            },
+          ),
         ),
         bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed, // Eğer fazla öğe varsa bu kullanılabilir
+          type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.blue,
           selectedItemColor: Colors.greenAccent,
           unselectedItemColor: Colors.white,

@@ -11,27 +11,19 @@ class KitapDetay extends StatelessWidget {
 
   KitapDetay({required this.book});
 
-  Future<void> addToCart(String bookId, String userId) async {
+  Future<void> addToCart(Book book, String userId) async {
     DatabaseReference cartReference = FirebaseDatabase.instance.ref("cart");
-
-    // Sepete ekleme işlemi için yeni bir key oluştur
     DatabaseReference newCartRef = cartReference.push();
+    await newCartRef.set({
+      'bookId': book.id,
+      'userId': userId,
+      'title': book.title,
+      'author': book.author,
+      'url':book.imageUrl,
+      'price':book.price,
+      'content':book.subject,
 
-    // Yeni bir 'cart item' oluştur
-    try {
-      await newCartRef.set({
-        'bookId': bookId,
-        'userId': userId,
-        'adet': 1,
-        // Ekstra bilgiler veya gereksinimlere göre diğer alanlar eklenebilir
-      });
-      Fluttertoast.showToast(
-          msg: 'Başarıyla Eklendi',
-          textColor: Colors.white,
-          backgroundColor: Colors.green);
-    } on FirebaseException catch (e) {
-      Fluttertoast.showToast(msg: e.message!);
-    }
+    });
   }
 
   Future<void> addToFavorites(String bookId, String userId) async {
@@ -44,6 +36,11 @@ class KitapDetay extends StatelessWidget {
       await newFavoriteRef.set({
         'bookId': bookId,
         'userId': userId,
+        'title': book.title,
+        'author': book.author,
+        'url':book.imageUrl,
+        'price':book.price,
+        'content':book.subject
       });
       Fluttertoast.showToast(
           msg: 'Favorilere Eklendi',
@@ -58,7 +55,7 @@ class KitapDetay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Book Details'), // AppBar başlığı
+        title: Text('Kitap Detayları'), // AppBar başlığı
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -106,7 +103,8 @@ class KitapDetay extends StatelessWidget {
                       ElevatedButton(
                         onPressed: () {
                           User? user = FirebaseAuth.instance.currentUser;
-                          addToCart(book.id.toString(), user!.uid);
+                          addToCart(book, user!.uid);
+                          Fluttertoast.showToast(msg: 'Sepete eklendi.');
                         },
                         child: Text('Sepete Ekle'), // Sepete ekle butonu
                       ),
@@ -117,6 +115,7 @@ class KitapDetay extends StatelessWidget {
                           onPressed: () {
                             User? user = FirebaseAuth.instance.currentUser;
                             addToFavorites(book.id.toString(), user!.uid);
+                            Fluttertoast.showToast(msg: 'Favorilere eklendi.');
                           },
                           icon: Icon(Icons.favorite_border), // Favori ekleme ikonu
                           color: Colors.red, // Favori ikon rengi

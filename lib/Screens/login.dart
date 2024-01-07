@@ -38,8 +38,7 @@ class _LoginState extends State<Login> {
         final User? user = authResult.user;
 
         if (user != null) {
-          // Firebase Authentication'dan kullanıcı başarıyla alındı
-          // Kullanıcıyı Realtime Database'de kontrol et ve gerekli işlemleri yap
+
           await _checkUserInDatabase(user);
 
           // Kullanıcıya bağlı olarak yönlendirme yap
@@ -62,9 +61,9 @@ class _LoginState extends State<Login> {
     }
   }
   Future<void> _checkUserInDatabase(User user) async {
-    final ref = FirebaseDatabase.instance.ref();
+    final ref = FirebaseDatabase.instance.ref('users');
     final snapshot = await ref.child(user.uid).once();
-    if (snapshot.snapshot.exists) {
+    if (snapshot.snapshot.exists==false) {
       // Kullanıcı veritabanında yok, bilgileri kaydet
       await _userRef.child(user.uid).set({
         'name': user.displayName,

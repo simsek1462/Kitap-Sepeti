@@ -43,28 +43,36 @@ class _HomeState extends State<Home> {
     });
   }
 
-  Future<void> addToCart(String bookId, String userId) async {
+  Future<void> addToCart(Book book, String userId) async {
     DatabaseReference cartReference = FirebaseDatabase.instance.ref("cart");
 
-    // Sepete ekleme işlemi için yeni bir key oluştur
     DatabaseReference newCartRef = cartReference.push();
 
     // Yeni bir 'cart item' oluştur
     await newCartRef.set({
-      'bookId': bookId,
+      'bookId': book.id,
       'userId': userId,
-      // Ekstra bilgiler veya gereksinimlere göre diğer alanlar eklenebilir
+      'title': book.title,
+      'author': book.author,
+      'url':book.imageUrl,
+      'price':book.price,
+      'content':book.subject,
     });
   }
 
-  Future<void> addToFavorites(String bookId, String userId) async {
+  Future<void> addToFavorites(Book book, String userId) async {
     DatabaseReference favoritesReference =
         FirebaseDatabase.instance.ref("favorites");
     DatabaseReference newFavoriteRef = favoritesReference.push();
 
     await newFavoriteRef.set({
-      'bookId': bookId,
+      'bookId': book.id,
       'userId': userId,
+      'title': book.title,
+      'author': book.author,
+      'url':book.imageUrl,
+      'price':book.price,
+      'content':book.subject
     });
   }
 
@@ -77,101 +85,94 @@ class _HomeState extends State<Home> {
           MaterialPageRoute(builder: (context) => KitapDetay(book: book)),
         );
       },
-      child: SizedBox(
-        height: 300,
-        child: Container(
-          margin: EdgeInsets.all(5),
-          padding: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 3,
-                blurRadius: 5,
-                offset: Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Column(
-                children: [
-                  Container(
-                    alignment: Alignment.topLeft,
-                    child: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          isFavorite =
-                              !isFavorite;
-                        });
-                        Fluttertoast.showToast(msg: 'Favorilere eklendi',textColor: Colors.redAccent,backgroundColor: Colors.white);
-                        addToFavorites(book.id.toString(), id.toString());
-                      },
-                      icon: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: Colors.redAccent,
-                      ),
-                    ),
+      child: Card(
+        margin: EdgeInsets.all(5),
+        color: Colors.white,
+        elevation: 10,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(book.imageUrl ?? ''),
+                    fit: BoxFit.fitHeight,
                   ),
-                  Image.network(
-                    book.imageUrl ?? '',
-                    width: 60,
-                    height: 60,
-                  ),
-                ],
+                ),
               ),
-              SizedBox(width: 10),
-              Column(
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     book.title ?? 'No Title',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
+                  SizedBox(height: 5),
                   Text(
                     book.author ?? '',
                   ),
+                  SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '${book.price.toString()} TL',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: Colors.black,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            isFavorite = !isFavorite;
+                          });
+                          Fluttertoast.showToast(
+                            msg: 'Favorilere eklendi',
+                            textColor: Colors.redAccent,
+                            backgroundColor: Colors.white,
+                          );
+                          addToFavorites(book, id.toString());
+                        },
+                        icon: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                      Expanded(
+                        child: IconButton(
+                          icon: Icon(Icons.shopping_basket_outlined),
+                          iconSize: 30,
+                          color: Colors.lightBlueAccent,
+                          onPressed: () {
+                            Fluttertoast.showToast(
+                              msg: 'Sepete eklendi',
+                              backgroundColor: Colors.green,
+                            );
+                            addToCart(
+                              book,
+                              id.toString(),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    '${book.price.toString()} TL',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Colors.black,
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.shopping_basket_outlined),
-                    iconSize: 30,
-                    color: Colors.lightBlueAccent,
-                    onPressed: () {
-                      Fluttertoast.showToast(
-                        msg: 'Sepete eklendi',
-                        backgroundColor: Colors.green,
-                      );
-                      addToCart(
-                        book.id.toString(),
-                        id.toString(),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
+
+
 
   int _selectedIndex = 0;
   void _onItemTapped(int index) {
@@ -292,9 +293,9 @@ class _HomeState extends State<Home> {
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
-                          crossAxisSpacing: 10,
+                          crossAxisSpacing: 5,
                           mainAxisSpacing: 10,
-                          childAspectRatio: 0.8,
+                          childAspectRatio: 0.6,
                         ),
                         itemCount: bookList.length,
                         shrinkWrap: true,
@@ -322,7 +323,7 @@ class _HomeState extends State<Home> {
         ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType
-              .fixed, // Eğer fazla öğe varsa bu kullanılabilir
+              .fixed,
           backgroundColor: Colors.blue,
           selectedItemColor: Colors.greenAccent,
           unselectedItemColor: Colors.white,

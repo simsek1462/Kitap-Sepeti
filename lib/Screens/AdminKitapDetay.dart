@@ -131,8 +131,6 @@ class _AdminKitapDetayState extends State<AdminKitapDetay> {
                       String updatedSubject = _subjectController.text;
                       String updatedUrl=_imageUrlController.text;
                       guncelle(updatedAuthor,widget.book.id.toString() , updatedTitle, updatedPrice.toString(), updatedSubject,updatedUrl);
-                      // Güncellenen bilgileri kullanarak işlemler yapılabilir
-                      // Örneğin, bir veritabanı güncellemesi yapılabilir
                     }
                   },
                   child: Text('Güncelle'),
